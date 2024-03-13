@@ -42,9 +42,13 @@ for i in df.columns:
   if i in cont:
     sns.histplot(df[i], kde = True)
     
+# Visualizing correlation of continuos and categorical variables.
 
-corr = df.corr()
-sns.heatmap(corr, annot= True, cmap= "Blues", fmt= ".1f", linewidths= .5)
+corr1 = df[['Age', 'BP', 'Cholesterol', 'Max HR', 'ST depression', 'Heart Disease']].corr()
+sns.heatmap(corr1, annot= True, cmap= "Blues", fmt= ".1f", linewidths= .5)
+
+corr2 = df[['Sex', 'Chest pain type', 'FBS over 120', 'EKG results', 'Exercise angina', 'Slope of ST', 'Number of vessels fluro', 'Thallium', 'Heart Disease']].corr()
+sns.heatmap(corr2, annot= True, cmap= "Blues", fmt= ".1f", linewidths= .5)
 
 ## Using profile report
 
@@ -96,3 +100,50 @@ ConfusionMatrixDisplay(confusion_matrix=cm, display_labels= log.classes_).plot()
 from sklearn.metrics import RocCurveDisplay
 
 RocCurveDisplay.from_predictions(y_test, y_predict)
+
+# Basic feature Selection using xgboost with the original dataset
+
+X = df.drop('Heart Disease', axis=1)
+X
+
+y = df['Heart Disease']
+y
+
+import xgboost
+
+model = xgboost.XGBClassifier()
+model.fit(X,y)
+
+## Creating a dataframe with feature importance data
+
+feat_imp = pd.Series(model.feature_importances_, index=X.columns)
+feat_imp.nlargest(10).plot(kind='barh')
+
+### we'll select the 3 variables with highest scores (Thallium, Chest pain type and Number of vessels fluro),
+### Additionally, we'll perform feature engineering in the selected variables.
+
+df2 = df1 = pd.get_dummies(df, columns=['Chest pain type', 'Number of vessels fluro', 'Thallium'])
+
+## Now we split our data as previously and train and test your algorithm
+
+X = df2.drop('Heart Disease', axis=1)
+X
+
+y = df2['Heart Disease']
+y
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size= .3, random_state= 0)
+
+log.fit(X_train, y_train)
+
+y_predict = log.predict(X_test)
+y_predict
+
+log.score(X_train,y_train)
+log.score(X_test,y_test)
+
+roc_auc_score(y_test, y_predict)
+
+RocCurveDisplay.from_predictions(y_test, y_predict)
+
+# After basic feature selection our model improved from 85% to 87%.
