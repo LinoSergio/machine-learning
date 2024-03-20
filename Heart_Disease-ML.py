@@ -122,7 +122,7 @@ feat_imp.nlargest(10).plot(kind='barh')
 ### we'll select the 3 variables with highest scores (Thallium, Chest pain type and Number of vessels fluro),
 ### Additionally, we'll perform feature engineering in the selected variables.
 
-df2 = df1 = pd.get_dummies(df, columns=['Chest pain type', 'Number of vessels fluro', 'Thallium'])
+df2 = pd.get_dummies(df, columns=['Chest pain type', 'Number of vessels fluro', 'Thallium'])
 
 ## Now we split our data as previously and train and test your algorithm
 
